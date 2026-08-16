@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>Prompt Lab</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     * {
@@ -20,78 +21,95 @@
     }
 
     header {
-      background: white;
-      padding: 20px;
+      background: #111827;
+      color: white;
+      padding: 25px 18px;
       text-align: center;
-      border-bottom: 1px solid #e5e7eb;
     }
 
     header h1 {
-      font-size: 30px;
+      font-size: 32px;
+      margin-bottom: 8px;
     }
 
     header p {
-      color: #6b7280;
-      margin-top: 6px;
+      color: #cbd5e1;
     }
 
     .search-box {
-      max-width: 650px;
-      margin: 30px auto;
-      padding: 0 20px;
+      max-width: 700px;
+      margin: 25px auto;
+      padding: 0 15px;
     }
 
-    .search-box input {
+    #search {
       width: 100%;
-      padding: 16px 20px;
+      padding: 16px;
       border: 1px solid #d1d5db;
-      border-radius: 14px;
+      border-radius: 12px;
       font-size: 16px;
       outline: none;
     }
 
     .container {
-      max-width: 1000px;
+      max-width: 1100px;
       margin: auto;
-      padding: 0 20px 40px;
+      padding: 10px 15px 40px;
     }
 
-    .prompt-card {
+    #prompts {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 22px;
+    }
+
+    .card {
       background: white;
-      border-radius: 18px;
+      border-radius: 16px;
       overflow: hidden;
-      margin-bottom: 30px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.06);
+      box-shadow: 0 5px 20px rgba(0,0,0,.08);
     }
 
-    .prompt-card img {
+    .card img {
       width: 100%;
-      height: 300px;
+      height: 210px;
       object-fit: cover;
       display: block;
     }
 
-    .prompt-content {
-      padding: 20px;
+    .content {
+      padding: 18px;
     }
 
-    .prompt-content h2 {
+    .content h2 {
       font-size: 20px;
+      margin-bottom: 10px;
+    }
+
+    .category {
+      display: inline-block;
+      background: #eef2ff;
+      color: #4f46e5;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 12px;
       margin-bottom: 12px;
     }
 
-    .prompt-text {
+    .prompt {
       background: #f3f4f6;
-      padding: 15px;
+      padding: 12px;
       border-radius: 10px;
-      line-height: 1.6;
-      color: #374151;
+      line-height: 1.5;
+      font-size: 14px;
+      max-height: 150px;
+      overflow: auto;
     }
 
-    .copy-btn {
-      margin-top: 15px;
+    button {
       width: 100%;
-      padding: 13px;
+      margin-top: 12px;
+      padding: 12px;
       border: none;
       border-radius: 10px;
       background: #111827;
@@ -100,8 +118,14 @@
       cursor: pointer;
     }
 
-    .copy-btn:hover {
+    button:hover {
       background: #374151;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 50px;
+      color: #6b7280;
     }
 
     footer {
@@ -109,121 +133,197 @@
       padding: 25px;
       color: #6b7280;
     }
-
-    @media (max-width: 600px) {
-      header h1 {
-        font-size: 26px;
-      }
-
-      .prompt-card img {
-        height: 220px;
-      }
-    }
   </style>
 </head>
 
 <body>
 
-  <header>
-    <h1>✨ Prompt Lab</h1>
-    <p>Discover powerful AI prompts</p>
-  </header>
+<header>
+  <h1>✨ Prompt Lab</h1>
+  <p>Discover amazing AI prompts</p>
+</header>
 
-  <div class="search-box">
-    <input
-      type="text"
-      id="searchInput"
-      placeholder="🔍 Search prompts..."
-      onkeyup="searchPrompts()"
-    >
+<div class="search-box">
+  <input
+    type="text"
+    id="search"
+    placeholder="🔍 Search prompts..."
+  >
+</div>
+
+<div class="container">
+  <div id="prompts">
+    <div class="empty">Loading prompts...</div>
   </div>
+</div>
 
-  <main class="container" id="promptContainer">
+<footer>
+  © 2026 Prompt Lab
+</footer>
 
-    <!-- Prompt 1 -->
-    <div class="prompt-card">
-      <img
-        src="https://images.unsplash.com/photo-1535378917042-10a22c95931a?auto=format&fit=crop&w=1200&q=80"
-        alt="AI generated style example"
-      >
+<script>
 
-      <div class="prompt-content">
-        <h2>🤖 Futuristic AI Portrait</h2>
+  // ==============================
+  // SUPABASE SETTINGS
+  // ==============================
 
-        <div class="prompt-text">
-          Create a highly realistic futuristic portrait of a person,
-          cinematic lighting, detailed face, dramatic background,
-          ultra realistic photography, 8K quality.
-        </div>
+  const SUPABASE_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
 
-        <button class="copy-btn" onclick="copyPrompt(this)">
-          📋 Copy Prompt
-        </button>
-      </div>
-    </div>
+  const SUPABASE_KEY = "PASTE_YOUR_PUBLISHABLE_KEY_HERE";
 
-    <!-- Prompt 2 -->
-    <div class="prompt-card">
-      <img
-        src="https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1200&q=80"
-        alt="Cinematic landscape"
-      >
+  const { createClient } = supabase;
 
-      <div class="prompt-content">
-        <h2>🌄 Cinematic Landscape</h2>
+  const db = createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
 
-        <div class="prompt-text">
-          Create a breathtaking cinematic landscape with dramatic mountains,
-          golden sunlight, realistic clouds, atmospheric lighting,
-          highly detailed environment, professional photography.
-        </div>
 
-        <button class="copy-btn" onclick="copyPrompt(this)">
-          📋 Copy Prompt
-        </button>
-      </div>
-    </div>
+  // ==============================
+  // LOAD PROMPTS
+  // ==============================
 
-  </main>
+  let allPrompts = [];
 
-  <footer>
-    © 2026 Prompt Lab
-  </footer>
+  async function loadPrompts() {
 
-  <script>
+    const { data, error } = await db
+      .from("prompts")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-    function copyPrompt(button) {
-      const prompt =
-        button.parentElement.querySelector(".prompt-text").innerText;
+    if (error) {
+      console.log(error);
 
-      navigator.clipboard.writeText(prompt);
+      document.getElementById("prompts").innerHTML =
+        '<div class="empty">Unable to load prompts.</div>';
 
-      button.innerText = "✅ Copied!";
-
-      setTimeout(() => {
-        button.innerText = "📋 Copy Prompt";
-      }, 1500);
+      return;
     }
 
-    function searchPrompts() {
-      const search =
-        document.getElementById("searchInput").value.toLowerCase();
+    allPrompts = data || [];
 
-      const cards =
-        document.querySelectorAll(".prompt-card");
+    displayPrompts(allPrompts);
+  }
 
-      cards.forEach(card => {
-        const text = card.innerText.toLowerCase();
 
-        if (text.includes(search)) {
-          card.style.display = "block";
-        } else {
-          card.style.display = "none";
+  // ==============================
+  // DISPLAY PROMPTS
+  // ==============================
+
+  function displayPrompts(prompts) {
+
+    const container = document.getElementById("prompts");
+
+    if (prompts.length === 0) {
+
+      container.innerHTML =
+        '<div class="empty">No prompts found 😔</div>';
+
+      return;
+    }
+
+    container.innerHTML = prompts.map(item => `
+
+      <div class="card">
+
+        ${
+          item.image_url
+          ? `<img src="${item.image_url}" alt="${item.title}">`
+          : ""
         }
-      });
-    }
 
-  </script>
+        <div class="content">
+
+          <h2>${escapeHTML(item.title)}</h2>
+
+          ${
+            item.category
+            ? `<span class="category">${escapeHTML(item.category)}</span>`
+            : ""
+          }
+
+          <div class="prompt">
+            ${escapeHTML(item.prompt)}
+          </div>
+
+          <button onclick="copyPrompt(${item.id})">
+            📋 Copy Prompt
+          </button>
+
+        </div>
+
+      </div>
+
+    `).join("");
+  }
+
+
+  // ==============================
+  // SEARCH
+  // ==============================
+
+  document.getElementById("search").addEventListener("input", function () {
+
+    const query = this.value.toLowerCase().trim();
+
+    const filtered = allPrompts.filter(item =>
+
+      (item.title || "").toLowerCase().includes(query) ||
+
+      (item.prompt || "").toLowerCase().includes(query) ||
+
+      (item.category || "").toLowerCase().includes(query)
+
+    );
+
+    displayPrompts(filtered);
+
+  });
+
+
+  // ==============================
+  // COPY PROMPT
+  // ==============================
+
+  async function copyPrompt(id) {
+
+    const item = allPrompts.find(p => p.id === id);
+
+    if (!item) return;
+
+    try {
+
+      await navigator.clipboard.writeText(item.prompt);
+
+      alert("✅ Prompt copied!");
+
+    } catch (error) {
+
+      alert("❌ Copy failed");
+
+    }
+  }
+
+
+  // ==============================
+  // SECURITY: ESCAPE HTML
+  // ==============================
+
+  function escapeHTML(text) {
+
+    const div = document.createElement("div");
+
+    div.textContent = text || "";
+
+    return div.innerHTML;
+  }
+
+
+  // START
+  loadPrompts();
+
+</script>
 
 </body>
 </html>
