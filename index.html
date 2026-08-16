@@ -1,1 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <title>Prompt Lab</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f5f7fb;
+      color: #111827;
+    }
+
+    header {
+      background: white;
+      padding: 20px;
+      text-align: center;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    header h1 {
+      font-size: 30px;
+    }
+
+    header p {
+      color: #6b7280;
+      margin-top: 6px;
+    }
+
+    .search-box {
+      max-width: 650px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 16px 20px;
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      padding: 0 20px 40px;
+    }
+
+    .prompt-card {
+      background: white;
+      border-radius: 18px;
+      overflow: hidden;
+      margin-bottom: 30px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.06);
+    }
+
+    .prompt-card img {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .prompt-content {
+      padding: 20px;
+    }
+
+    .prompt-content h2 {
+      font-size: 20px;
+      margin-bottom: 12px;
+    }
+
+    .prompt-text {
+      background: #f3f4f6;
+      padding: 15px;
+      border-radius: 10px;
+      line-height: 1.6;
+      color: #374151;
+    }
+
+    .copy-btn {
+      margin-top: 15px;
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 10px;
+      background: #111827;
+      color: white;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .copy-btn:hover {
+      background: #374151;
+    }
+
+    footer {
+      text-align: center;
+      padding: 25px;
+      color: #6b7280;
+    }
+
+    @media (max-width: 600px) {
+      header h1 {
+        font-size: 26px;
+      }
+
+      .prompt-card img {
+        height: 220px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>✨ Prompt Lab</h1>
+    <p>Discover powerful AI prompts</p>
+  </header>
+
+  <div class="search-box">
+    <input
+      type="text"
+      id="searchInput"
+      placeholder="🔍 Search prompts..."
+      onkeyup="searchPrompts()"
+    >
+  </div>
+
+  <main class="container" id="promptContainer">
+
+    <!-- Prompt 1 -->
+    <div class="prompt-card">
+      <img
+        src="https://images.unsplash.com/photo-1535378917042-10a22c95931a?auto=format&fit=crop&w=1200&q=80"
+        alt="AI generated style example"
+      >
+
+      <div class="prompt-content">
+        <h2>🤖 Futuristic AI Portrait</h2>
+
+        <div class="prompt-text">
+          Create a highly realistic futuristic portrait of a person,
+          cinematic lighting, detailed face, dramatic background,
+          ultra realistic photography, 8K quality.
+        </div>
+
+        <button class="copy-btn" onclick="copyPrompt(this)">
+          📋 Copy Prompt
+        </button>
+      </div>
+    </div>
+
+    <!-- Prompt 2 -->
+    <div class="prompt-card">
+      <img
+        src="https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1200&q=80"
+        alt="Cinematic landscape"
+      >
+
+      <div class="prompt-content">
+        <h2>🌄 Cinematic Landscape</h2>
+
+        <div class="prompt-text">
+          Create a breathtaking cinematic landscape with dramatic mountains,
+          golden sunlight, realistic clouds, atmospheric lighting,
+          highly detailed environment, professional photography.
+        </div>
+
+        <button class="copy-btn" onclick="copyPrompt(this)">
+          📋 Copy Prompt
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    © 2026 Prompt Lab
+  </footer>
+
+  <script>
+
+    function copyPrompt(button) {
+      const prompt =
+        button.parentElement.querySelector(".prompt-text").innerText;
+
+      navigator.clipboard.writeText(prompt);
+
+      button.innerText = "✅ Copied!";
+
+      setTimeout(() => {
+        button.innerText = "📋 Copy Prompt";
+      }, 1500);
+    }
+
+    function searchPrompts() {
+      const search =
+        document.getElementById("searchInput").value.toLowerCase();
+
+      const cards =
+        document.querySelectorAll(".prompt-card");
+
+      cards.forEach(card => {
+        const text = card.innerText.toLowerCase();
+
+        if (text.includes(search)) {
+          card.style.display = "block";
+        } else {
+          card.style.display = "none";
+        }
+      });
+    }
+
+  </script>
+
+</body>
+</html>
